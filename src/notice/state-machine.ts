@@ -7,6 +7,7 @@
  * Platforms can customize by providing their own transitions.
  */
 
+import { randomUUID } from 'node:crypto';
 import { NoticeState, type Notice, type StateTransition } from './types.js';
 
 export interface NoticeStateMachineConfig {
@@ -125,7 +126,7 @@ export function createNotice(params: {
   metadata?: Record<string, unknown>;
 }): Notice {
   return {
-    id: params.id ?? crypto.randomUUID(),
+    id: params.id ?? randomUUID(),
     source: params.source,
     content: params.content,
     classification: params.classification,

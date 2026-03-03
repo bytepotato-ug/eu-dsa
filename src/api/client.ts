@@ -4,6 +4,7 @@
  * Typed HTTP client for https://transparency.dsa.ec.europa.eu/api/v1/
  */
 
+import { randomUUID } from 'node:crypto';
 import type {
   SorSubmission,
   SorSubmissionResponse,
@@ -203,7 +204,7 @@ export class TransparencyDatabaseClient {
 
   private async request<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
     const url = `${this.baseUrl}${path}`;
-    const requestId = crypto.randomUUID();
+    const requestId = randomUUID();
 
     let ctx: RequestContext = {
       method,

@@ -2,6 +2,7 @@
  * Offline queue interface and in-memory implementation.
  */
 
+import { randomUUID } from 'node:crypto';
 import type { SorSubmission, SorSubmissionResponse } from '../schemas/api-types.js';
 
 export interface QueuedStatement {
@@ -42,7 +43,7 @@ export class InMemoryQueue implements OfflineQueue {
     }
 
     const item: QueuedStatement = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       submission,
       addedAt: new Date(),
       attempts: 0,
