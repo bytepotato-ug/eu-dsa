@@ -2,7 +2,7 @@
  * Platform category mapper — bridges platform-specific categories to EU API categories.
  */
 import type { Category, CategorySpecification, ContentType, TerritorialScopeCode } from '../schemas/enums.js';
-import { SoRBuilder } from './builder.js';
+import type { SoRBuilder } from './builder.js';
 export interface CategoryMapping {
     euCategory: Category;
     euSpecifications?: CategorySpecification[];
