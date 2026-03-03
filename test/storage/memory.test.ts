@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
 import { createInMemoryStorage } from '../../src/storage/memory.js';
 import { NoticeState, type Notice } from '../../src/notice/types.js';
@@ -6,7 +7,7 @@ import type { QueuedStatement } from '../../src/api/queue.js';
 
 function makeNotice(overrides: Partial<Notice> = {}): Notice {
   return {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     source: { type: 'SOURCE_ARTICLE_16', reporterId: 'r1', isTrustedFlagger: false },
     content: { contentId: 'post-1', contentType: 'text' },
     classification: { platformCategory: 'spam' },
@@ -20,7 +21,7 @@ function makeNotice(overrides: Partial<Notice> = {}): Notice {
 
 function makeAppeal(overrides: Partial<Appeal> = {}): Appeal {
   return {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     appellantId: 'user-1',
     originalDecision: 'Content removed',
     appealText: 'I disagree',
@@ -223,7 +224,7 @@ describe('InMemoryStorage', () => {
   describe('queue', () => {
     function makeQueueItem(): QueuedStatement {
       return {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         submission: {
           decision_visibility: ['DECISION_VISIBILITY_CONTENT_REMOVED'],
           decision_ground: 'DECISION_GROUND_ILLEGAL_CONTENT',
