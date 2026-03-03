@@ -51,3 +51,9 @@ export { AppealWorkflow, type AppealWorkflowConfig } from './appeals/workflow.js
 // Storage
 export type { StorageAdapter, ListOptions, PaginatedResult, NoticeFilters, AppealFilters } from './storage/adapter.js';
 export { createInMemoryStorage } from './storage/memory.js';
+
+// Transparency Reports
+export { DsaTier } from './reports/types.js';
+export type { ReportingPeriod, TransparencyReport, ReportIdentification, TransparencyDataProvider } from './reports/index.js';
+export { TransparencyReportGenerator, createReportGenerator, type ReportGeneratorConfig } from './reports/generator.js';
+export { toCSV, toJSON, toMarkdown, type CSVParts } from './reports/formatters.js';
