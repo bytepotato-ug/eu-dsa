@@ -321,7 +321,7 @@ import { createDsaEventEmitter } from 'dsa-toolkit/events';
 - [x] v0.1.0 — Core schemas, API client, SoR builder, PUID generation, pseudonymization, platform mapper
 - [x] v0.2.0 — Notice engine, appeals handler, event system integration, storage adapter
 - [x] v0.5.0 — Transparency reports (CSV/JSON/Markdown per EU template), typed event emitter
-- [ ] v1.0.0 — Stable API, 90%+ coverage, full documentation
+- [x] v1.0.0 — Stable API, 90%+ coverage, full documentation
 - [ ] Post-1.0 — Express/Fastify/Hono middleware, Mastodon adapter, database storage adapters
 
 ## License
