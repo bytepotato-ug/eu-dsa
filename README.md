@@ -287,6 +287,26 @@ try {
 }
 ```
 
+## What This Library Covers vs. What You Build
+
+`dsa-toolkit` handles the **protocol layer** — talking to the EU, validating data, building compliant submissions. Your platform still needs application-level code to tie it all together.
+
+| Layer | dsa-toolkit provides | You build |
+|-------|---------------------|-----------|
+| **EU API** | HTTP client, auth, retries, rate limiting, batch chunking | Client initialization, API token management |
+| **Statements of Reasons** | `SoRBuilder` fluent API, Zod validation, 160+ EU enums | Database schema, SoR creation logic, user notification |
+| **Category Mapping** | `createPlatformMapper()`, full EU taxonomy | Mapping your categories to EU categories |
+| **GDPR** | `sanitizeForSubmission()`, IP/email/mention stripping | Deciding what fields to sanitize |
+| **Submission** | Submit/batch/queue to EU Transparency Database | Background job queue (BullMQ, SQS, etc.), error recovery |
+| **Notices (Art. 16)** | State machine, deadline calculator, priority scoring | Database persistence, admin review UI |
+| **Appeals (Art. 20)** | Workflow state machine, 6-month window calculator | Complaint database, different-reviewer enforcement, user notification |
+| **Trusted Flaggers (Art. 22)** | Priority multiplier, accuracy evaluation | Accuracy tracking in your database, status management |
+| **Reports (Art. 15/24)** | Report generator, CSV/JSON/Markdown formatters | `TransparencyDataProvider` implementation (queries your database) |
+
+**In short**: `dsa-toolkit` is ~20% of the work. The remaining ~80% is application code specific to your platform, database, and infrastructure.
+
+See the [Integration Guide](docs/INTEGRATION-GUIDE.md) for a step-by-step walkthrough with code examples, and the [example Prisma schema](examples/prisma-schema.prisma) for a ready-to-copy database schema.
+
 ## What's Covered
 
 | DSA Article | Obligation | Module | Status |
@@ -321,8 +341,8 @@ import { createDsaEventEmitter } from 'dsa-toolkit/events';
 - [x] v0.1.0 — Core schemas, API client, SoR builder, PUID generation, pseudonymization, platform mapper
 - [x] v0.2.0 — Notice engine, appeals handler, event system integration, storage adapter
 - [x] v0.5.0 — Transparency reports (CSV/JSON/Markdown per EU template), typed event emitter
-- [x] v1.0.0 — Stable API, 90%+ coverage, full documentation
-- [ ] Post-1.0 — Express/Fastify/Hono middleware, Mastodon adapter, database storage adapters
+- [x] v1.0.0 — Stable API, 97%+ test coverage, full documentation, integration guide
+- [ ] Post-1.0 — Express/Fastify middleware, Prisma storage adapter, Mastodon adapter
 
 ## License
 
