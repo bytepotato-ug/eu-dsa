@@ -1,8 +1,8 @@
 # Integration Guide
 
-Step-by-step guide to integrating `dsa-toolkit` into a production platform. Based on a real-world implementation in a Node.js + Express + Prisma + BullMQ stack.
+Step-by-step guide to integrating `eu-dsa` into a production platform. Based on a real-world implementation in a Node.js + Express + Prisma + BullMQ stack.
 
-> This guide assumes you've already `npm install dsa-toolkit` and are familiar with the [Quick Start](../README.md#quick-start-submit-a-statement-of-reasons) in the README. Here we cover everything else you need to build.
+> This guide assumes you've already `npm install eu-dsa` and are familiar with the [Quick Start](../README.md#quick-start-submit-a-statement-of-reasons) in the README. Here we cover everything else you need to build.
 
 ## Table of Contents
 
@@ -85,7 +85,7 @@ if (process.env.DSA_EU_SUBMISSIONS_ENABLED === 'true' && !process.env.DSA_EU_API
 Use a singleton pattern — create one client instance and reuse it:
 
 ```typescript
-import { TransparencyDatabaseClient } from 'dsa-toolkit';
+import { TransparencyDatabaseClient } from 'eu-dsa';
 
 let client: TransparencyDatabaseClient | null = null;
 
@@ -96,14 +96,14 @@ export function getDsaClient(): TransparencyDatabaseClient {
       baseUrl: process.env.DSA_EU_API_BASE_URL, // undefined = production EU endpoint
       timeoutMs: 30_000,
       retry: { maxAttempts: 1 }, // Set to 1 if your job queue handles retries
-      userAgent: 'yourplatform/1.0 dsa-toolkit/1.0.0',
+      userAgent: 'yourplatform/1.0 eu-dsa/1.0.0',
     });
   }
   return client;
 }
 ```
 
-**Why `maxAttempts: 1`?** If you use a job queue (BullMQ, SQS, etc.) for retries, let the queue handle retry logic. The dsa-toolkit client's built-in retry is for simple scripts without a queue.
+**Why `maxAttempts: 1`?** If you use a job queue (BullMQ, SQS, etc.) for retries, let the queue handle retry logic. The eu-dsa client's built-in retry is for simple scripts without a queue.
 
 ---
 
@@ -119,7 +119,7 @@ import {
   Category,
   CategorySpecification,
   ContentType,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 // Define your platform's categories as a union type or enum
 type MyCategory = 'HATE_SPEECH' | 'TERRORISM' | 'SPAM' | 'COPYRIGHT' | 'HARASSMENT' | 'OTHER';
@@ -192,7 +192,7 @@ applyCategory(builder, 'HATE_SPEECH');
 DSA Art. 17 requires you to notify users whenever you take a moderation action. Create a service that generates these notifications:
 
 ```typescript
-import { deterministicPuid } from 'dsa-toolkit';
+import { deterministicPuid } from 'eu-dsa';
 
 // Standard redress information — same for every statement
 const REDRESS_INFO = `You have the right to contest this decision:
@@ -292,7 +292,7 @@ async function createContentDecisionStatement(params: {
 
 ## 6. Submitting to the EU
 
-This is the core integration with dsa-toolkit. Fetch your statement from the database, build an SoR using the builder, and submit:
+This is the core integration with eu-dsa. Fetch your statement from the database, build an SoR using the builder, and submit:
 
 ```typescript
 import {
@@ -303,7 +303,7 @@ import {
   DecisionVisibility,
   DecisionAccount,
   sanitizeForSubmission,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 async function submitStatementToEU(statementId: string): Promise<void> {
   const statement = await db.statementOfReasons.findById(statementId);
@@ -411,7 +411,7 @@ async function submitStatementToEU(statementId: string): Promise<void> {
 
 ## 7. Error Handling in Production
 
-dsa-toolkit throws specific error types. Each one needs a different response:
+eu-dsa throws specific error types. Each one needs a different response:
 
 ```typescript
 import {
@@ -420,7 +420,7 @@ import {
   DsaValidationError,
   DsaRateLimitError,
   DsaApiError,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 async function handleSubmissionError(statementId: string, error: unknown): Promise<void> {
   // PUID conflict — this statement was already submitted (idempotent recovery)
@@ -533,10 +533,10 @@ worker.on('failed', (job, error) => {
 
 ### Without a Queue
 
-If you don't have Redis/BullMQ, use dsa-toolkit's built-in `InMemoryQueue`:
+If you don't have Redis/BullMQ, use eu-dsa's built-in `InMemoryQueue`:
 
 ```typescript
-import { TransparencyDatabaseClient, InMemoryQueue } from 'dsa-toolkit';
+import { TransparencyDatabaseClient, InMemoryQueue } from 'eu-dsa';
 
 const client = new TransparencyDatabaseClient({ token: process.env.DSA_EU_API_TOKEN! });
 const queue = new InMemoryQueue();
@@ -572,7 +572,7 @@ See the `Complaint` model in [`examples/prisma-schema.prisma`](../examples/prism
 ### Submission validation
 
 ```typescript
-import { isAppealWindowOpen } from 'dsa-toolkit';
+import { isAppealWindowOpen } from 'eu-dsa';
 
 async function createComplaint(userId: string, statementId: string, complaintText: string) {
   const statement = await db.statementOfReasons.findById(statementId);
@@ -650,7 +650,7 @@ Trusted flaggers are entities recognized for expertise in detecting illegal cont
 ### Tracking accuracy
 
 ```typescript
-import { evaluateFlaggerStatus, calculatePriority } from 'dsa-toolkit';
+import { evaluateFlaggerStatus, calculatePriority } from 'eu-dsa';
 
 // After resolving a report, update the flagger's stats
 async function updateFlaggerStats(reporterId: string) {
@@ -668,7 +668,7 @@ async function updateFlaggerStats(reporterId: string) {
     where: { reporterId, status: 'NO_ACTION' },
   });
 
-  // Use dsa-toolkit to evaluate eligibility
+  // Use eu-dsa to evaluate eligibility
   const evaluation = evaluateFlaggerStatus({
     totalReports,
     actionTakenCount: actionTaken,
@@ -710,15 +710,15 @@ async function processReport(report: Report) {
 
 ## 11. Transparency Reports (Art. 15/24)
 
-DSA requires annual transparency reports. dsa-toolkit generates them — you provide the data.
+DSA requires annual transparency reports. eu-dsa generates them — you provide the data.
 
 ### Implementing the data provider
 
 The `TransparencyDataProvider` interface defines 9 methods you need to implement. Each one queries your database:
 
 ```typescript
-import { createReportGenerator, toCSV, toJSON, toMarkdown } from 'dsa-toolkit';
-import type { TransparencyDataProvider, ReportingPeriod } from 'dsa-toolkit/reports';
+import { createReportGenerator, toCSV, toJSON, toMarkdown } from 'eu-dsa';
+import type { TransparencyDataProvider, ReportingPeriod } from 'eu-dsa/reports';
 
 const provider: TransparencyDataProvider = {
   async getAuthorityOrders(period) {
@@ -803,7 +803,7 @@ const csvParts = toCSV(report);  // Spreadsheet-friendly (one CSV per section)
 Once you have all of this integrated:
 
 1. **Test with `DSA_EU_SUBMISSIONS_ENABLED=false`** — verify statements are created and queued correctly without hitting the EU API
-2. **Test against the mock server** — use `dsa-toolkit/testing` to run a local mock EU API
+2. **Test against the mock server** — use `eu-dsa/testing` to run a local mock EU API
 3. **Register at the EU Transparency Database** — get your production API token
 4. **Flip `DSA_EU_SUBMISSIONS_ENABLED=true`** — start submitting for real
 

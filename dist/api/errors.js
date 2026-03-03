@@ -1,5 +1,5 @@
 /**
- * Error class hierarchy for dsa-toolkit.
+ * Error class hierarchy for eu-dsa.
  *
  * DsaToolkitError (base)
  * ├── DsaValidationError — Zod schema validation failures

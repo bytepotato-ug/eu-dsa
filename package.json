@@ -1,5 +1,5 @@
 {
-  "name": "dsa-toolkit",
+  "name": "eu-dsa",
   "version": "1.0.0",
   "description": "Open-source EU Digital Services Act compliance toolkit — Statement of Reasons submission, transparency reports, notice-and-action engine, and appeals handling for Node.js platforms",
   "type": "module",

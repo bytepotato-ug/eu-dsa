@@ -5,11 +5,11 @@ Complete reference for all exported functions, classes, and types.
 **Import patterns:**
 ```ts
 // Everything from the main entry
-import { SoRBuilder, TransparencyDatabaseClient, ... } from 'dsa-toolkit';
+import { SoRBuilder, TransparencyDatabaseClient, ... } from 'eu-dsa';
 
 // Module-specific imports (tree-shakeable)
-import { SoRBuilder } from 'dsa-toolkit/sor';
-import { TransparencyDatabaseClient } from 'dsa-toolkit/api';
+import { SoRBuilder } from 'eu-dsa/sor';
+import { TransparencyDatabaseClient } from 'eu-dsa/api';
 ```
 
 ---
@@ -29,7 +29,7 @@ import { TransparencyDatabaseClient } from 'dsa-toolkit/api';
 
 ## Schemas Module
 
-`import { ... } from 'dsa-toolkit/schemas'`
+`import { ... } from 'eu-dsa/schemas'`
 
 ### Enums
 
@@ -126,7 +126,7 @@ interface RateLimitInfo {
 
 ## API Client Module
 
-`import { ... } from 'dsa-toolkit/api'`
+`import { ... } from 'eu-dsa/api'`
 
 ### TransparencyDatabaseClient
 
@@ -147,7 +147,7 @@ new TransparencyDatabaseClient(config: TransparencyDatabaseClientConfig)
 | `retry` | `Partial<RetryConfig>` | See RetryConfig | Retry configuration |
 | `interceptors` | `{ request?, response? }` | `[]` | Request/response interceptors |
 | `fetch` | `typeof fetch` | `globalThis.fetch` | Custom fetch implementation |
-| `userAgent` | `string` | `dsa-toolkit/{version}` | User-Agent header |
+| `userAgent` | `string` | `eu-dsa/{version}` | User-Agent header |
 
 #### Methods
 
@@ -242,7 +242,7 @@ See [ERROR-HANDLING.md](./ERROR-HANDLING.md) for detailed error handling pattern
 
 ## SoR Builder Module
 
-`import { ... } from 'dsa-toolkit/sor'`
+`import { ... } from 'eu-dsa/sor'`
 
 ### SoRBuilder
 
@@ -385,7 +385,7 @@ interface CategoryMapping {
 
 ## Notice Engine Module
 
-`import { ... } from 'dsa-toolkit/notice'`
+`import { ... } from 'eu-dsa/notice'`
 
 ### NoticeStateMachine
 
@@ -447,7 +447,7 @@ applyCommunityBonus(basePriority: number, reporterCount: number, options?: {
 
 ## Appeals Module
 
-`import { ... } from 'dsa-toolkit/appeals'`
+`import { ... } from 'eu-dsa/appeals'`
 
 ### AppealWorkflow
 
@@ -484,7 +484,7 @@ Default window: 180 days (6 months per DSA Art. 20(1)).
 
 ## Events Module
 
-`import { ... } from 'dsa-toolkit/events'`
+`import { ... } from 'eu-dsa/events'`
 
 ### createDsaEventEmitter
 
@@ -531,7 +531,7 @@ createDsaEventEmitter(options?: { maxListeners?: number }): DsaEventEmitter
 
 ## Reports Module
 
-`import { ... } from 'dsa-toolkit/reports'`
+`import { ... } from 'eu-dsa/reports'`
 
 ### TransparencyReportGenerator
 
@@ -581,7 +581,7 @@ toMarkdown(report: TransparencyReport): string
 
 ## Storage Module
 
-`import { ... } from 'dsa-toolkit/storage'`
+`import { ... } from 'eu-dsa/storage'`
 
 ### StorageAdapter Interface
 

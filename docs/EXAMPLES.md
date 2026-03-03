@@ -1,6 +1,6 @@
 # Examples
 
-Real-world integration patterns for dsa-toolkit.
+Real-world integration patterns for eu-dsa.
 
 ## Express Integration
 
@@ -15,7 +15,7 @@ import {
   CategorySpecification,
   randomPuid,
   sanitizeForSubmission,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 const app = express();
 app.use(express.json());
@@ -112,7 +112,7 @@ app.listen(3000);
 import {
   TransparencyDatabaseClient,
   InMemoryQueue,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 const client = new TransparencyDatabaseClient({
   token: process.env.EU_API_TOKEN!,
@@ -148,7 +148,7 @@ import {
   SoRBuilder,
   randomPuid,
   sanitizeForSubmission,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 const client = new TransparencyDatabaseClient({
   token: process.env.EU_API_TOKEN!,
@@ -195,7 +195,7 @@ import {
   calculatePriority,
   createDsaEventEmitter,
   createInMemoryStorage,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 const stateMachine = new NoticeStateMachine({
   onTransition: async (notice, from, to) => {
@@ -283,8 +283,8 @@ import {
   toCSV,
   toJSON,
   toMarkdown,
-} from 'dsa-toolkit';
-import type { TransparencyDataProvider, ReportingPeriod } from 'dsa-toolkit/reports';
+} from 'eu-dsa';
+import type { TransparencyDataProvider, ReportingPeriod } from 'eu-dsa/reports';
 import fs from 'node:fs';
 
 // Implement the data provider backed by your database
