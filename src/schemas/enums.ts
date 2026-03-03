@@ -124,7 +124,7 @@ export const Category = {
 export type Category = (typeof Category)[keyof typeof Category];
 
 // =============================================================================
-// CATEGORY SPECIFICATION / KEYWORDS (57 values)
+// CATEGORY SPECIFICATION / KEYWORDS (69 values)
 // =============================================================================
 
 export const CategorySpecification = {
@@ -248,7 +248,7 @@ export type TerritorialScopeCode = (typeof TerritorialScope)[number];
 // Helpers for extracting enum values for Zod schemas
 // =============================================================================
 
-export function enumValues<T extends Record<string, string>>(obj: T): [string, ...string[]] {
-  const values = Object.values(obj);
-  return values as [string, ...string[]];
+export function enumValues<T extends Record<string, string>>(obj: T): [T[keyof T], ...T[keyof T][]] {
+  const values = Object.values(obj) as T[keyof T][];
+  return values as [T[keyof T], ...T[keyof T][]];
 }

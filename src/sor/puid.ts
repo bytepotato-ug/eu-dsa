@@ -65,5 +65,6 @@ export function isValidPuid(puid: string): boolean {
 
 /** Sanitize a string for use in PUID (replace invalid chars with hyphens) */
 function sanitize(str: string): string {
-  return str.replace(/[^a-zA-Z0-9\-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  const result = str.replace(/[^a-zA-Z0-9\-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  return result || 'platform';
 }

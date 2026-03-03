@@ -14,7 +14,8 @@ describe('SoRBuilder edge cases', () => {
       .source('ARTICLE_16')
       .automatedDetection(false)
       .automatedDecision('NOT_AUTOMATED')
-      .puid('test-puid-1');
+      .puid('test-puid-1')
+      .territorialScope(['DE']);
   }
 
   describe('contentId', () => {
@@ -146,6 +147,7 @@ describe('SoRBuilder edge cases', () => {
         .automatedDetection(false)
         .automatedDecision('NOT_AUTOMATED')
         .puid('other-vis-puid')
+        .territorialScope(['DE'])
         .build();
 
       expect(result.decision_visibility_other).toBe('Custom restriction');

@@ -268,7 +268,7 @@ export class SoRBuilder {
   }
 
   toJSON(): Partial<SorSubmission> {
-    return { ...this.data };
+    return structuredClone(this.data);
   }
 
   validate(): { valid: boolean; errors?: Record<string, string[]> } {

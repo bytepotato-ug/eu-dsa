@@ -13,7 +13,8 @@ function minimalBuilder() {
     .facts('Content contained hate speech.')
     .source('ARTICLE_16')
     .automatedDetection(false)
-    .automatedDecision('NOT_AUTOMATED');
+    .automatedDecision('NOT_AUTOMATED')
+    .territorialScope(['DE']);
 }
 
 describe('SoRBuilder', () => {

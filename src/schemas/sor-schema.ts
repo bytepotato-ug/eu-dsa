@@ -95,7 +95,7 @@ export const sorSubmissionSchema = z.object({
     .regex(puidRegex, 'puid must contain only alphanumeric characters, hyphens, and underscores'),
 
   // Scope
-  territorial_scope: z.array(z.enum(TerritorialScope as unknown as readonly [string, ...string[]])).optional().nullable(),
+  territorial_scope: z.array(z.enum(TerritorialScope as unknown as readonly [string, ...string[]])).min(1, 'At least one territorial_scope is required'),
   content_language: z.string().length(2).optional().nullable(),
 
   // Content ID
@@ -154,7 +154,7 @@ export const sorSubmissionSchema = z.object({
   }
 
   // Rule 4: "Other" free text required when OTHER enum selected
-  if (data.decision_visibility?.includes(DecisionVisibility.OTHER as string) && !data.decision_visibility_other) {
+  if (data.decision_visibility?.includes(DecisionVisibility.OTHER) && !data.decision_visibility_other) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'decision_visibility_other is required when DECISION_VISIBILITY_OTHER is selected',
@@ -170,11 +170,19 @@ export const sorSubmissionSchema = z.object({
     });
   }
 
-  if (data.content_type.includes(ContentType.OTHER as string) && !data.content_type_other) {
+  if (data.content_type.includes(ContentType.OTHER) && !data.content_type_other) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'content_type_other is required when CONTENT_TYPE_OTHER is selected',
       path: ['content_type_other'],
+    });
+  }
+
+  if (data.category_specification?.includes(CategorySpecification.OTHER) && !data.category_specification_other) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'category_specification_other is required when KEYWORD_OTHER is selected',
+      path: ['category_specification_other'],
     });
   }
 
@@ -199,6 +207,23 @@ export const sorSubmissionSchema = z.object({
       message: 'application_date must be on or after 2020-01-01',
       path: ['application_date'],
     });
+  }
+
+  // End dates must be >= application_date
+  const endDateFields = [
+    'end_date_visibility_restriction',
+    'end_date_monetary_restriction',
+    'end_date_service_restriction',
+    'end_date_account_restriction',
+  ] as const;
+  for (const field of endDateFields) {
+    if (data[field] && data[field]! < data.application_date) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `${field} must be on or after application_date`,
+        path: [field],
+      });
+    }
   }
 });
 

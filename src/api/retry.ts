@@ -55,9 +55,10 @@ export async function withRetry<T>(
 
       let delayMs = calculateDelay(attempt, config);
 
-      // Use retryAfterMs from DsaRateLimitError (parsed from Retry-After header)
+      // Use retryAfterMs from DsaRateLimitError (parsed from Retry-After header).
+      // Trust the server's Retry-After value — capping it risks retry storms.
       if (error instanceof DsaRateLimitError && error.retryAfterMs > 0) {
-        delayMs = Math.min(error.retryAfterMs, config.maxDelayMs);
+        delayMs = error.retryAfterMs;
       }
 
       config.onRetry?.(attempt, error as Error, delayMs);

@@ -79,8 +79,8 @@ export class DsaApiError extends DsaToolkitError {
 }
 
 export class DsaAuthError extends DsaApiError {
-  constructor(message: string, statusCode: 401 | 403) {
-    super(message, statusCode);
+  constructor(message: string, statusCode: 401 | 403, response?: Record<string, unknown>) {
+    super(message, statusCode, response);
     this.name = 'DsaAuthError';
   }
 }
