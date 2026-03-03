@@ -34,3 +34,20 @@ export { createPlatformMapper, type PlatformMappingConfig, type CategoryMapping 
 // Events
 export { createDsaEventEmitter, type DsaEventEmitter, type DsaEventHandler } from './events/emitter.js';
 export type { DsaEventMap, DsaEventName } from './events/types.js';
+
+// Notice-and-Action Engine
+export { NoticeState } from './notice/types.js';
+export type { Notice, NoticeSource, NoticeClassification, NoticeDecision, ContentSnapshot, StateTransition, NoticeCreateParams } from './notice/types.js';
+export { NoticeStateMachine, createNotice, type NoticeStateMachineConfig } from './notice/state-machine.js';
+export { calculateDeadline, getNoticeDeadlines, getDeadlineAlerts, type Deadline, type DeadlineType, type DeadlineConfig } from './notice/deadlines.js';
+export { calculatePriority, evaluateFlaggerStatus, applyCommunityBonus, type TrustedFlaggerConfig, type FlaggerStats, type FlaggerEvaluation } from './notice/trusted-flagger.js';
+
+// Appeals / Complaint Handler
+export { AppealState, AppealOutcomeResult } from './appeals/types.js';
+export type { Appeal, AppealCreateParams, AppealOutcome, AppealStats } from './appeals/types.js';
+export { isAppealWindowOpen, getAppealWindowStatus, calculateAppealWindowEnd, type AppealWindowConfig, type AppealWindowStatus } from './appeals/window.js';
+export { AppealWorkflow, type AppealWorkflowConfig } from './appeals/workflow.js';
+
+// Storage
+export type { StorageAdapter, ListOptions, PaginatedResult, NoticeFilters, AppealFilters } from './storage/adapter.js';
+export { createInMemoryStorage } from './storage/memory.js';
