@@ -1,0 +1,190 @@
+// =============================================================================
+// DSA Compliance — Prisma Schema
+// =============================================================================
+//
+// Ready-to-copy database models for integrating dsa-toolkit into your platform.
+// Add these models to your existing schema.prisma file.
+//
+// Models:
+//   - StatementOfReasons  (DSA Art. 17)
+//   - Complaint           (DSA Art. 20)
+//   - User fields         (DSA Art. 22 + 23)
+//   - Report fields       (DSA Art. 16 + 22)
+//
+// Requires: PostgreSQL (for @db.Text). Adapt column types for MySQL/SQLite.
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// Add these fields to your existing User model
+// ---------------------------------------------------------------------------
+//
+// model User {
+//   // ... your existing fields ...
+//
+//   // DSA Art. 23 — Repeat offender tracking
+//   // Platforms must consider suspension for users who "frequently" provide
+//   // manifestly illegal content (Art. 23(1)).
+//   warningCount       Int       @default(0)
+//   suspensionCount    Int       @default(0)
+//   lastViolationAt    DateTime?
+//
+//   // DSA Art. 22 — Trusted Flagger system
+//   // Trusted flaggers are entities recognized for expertise in detecting
+//   // illegal content. Their notices receive priority processing.
+//   isTrustedFlagger       Boolean   @default(false)
+//   trustedFlaggerSince    DateTime?
+//   trustedFlaggerReports  Int       @default(0)  // Total reports submitted
+//   trustedFlaggerAccuracy Int       @default(0)  // Accuracy percentage (0-100)
+//
+//   // Relations
+//   statementsReceived StatementOfReasons[] @relation("StatementRecipient")
+//   complaints         Complaint[]
+// }
+
+// ---------------------------------------------------------------------------
+// Add these fields to your existing Report / ContentReport model
+// ---------------------------------------------------------------------------
+//
+// model Report {
+//   // ... your existing fields ...
+//
+//   // DSA Art. 16(6) — Notification to reporter
+//   // Platforms must notify reporters of the outcome of their report.
+//   reporterNotifiedAt       DateTime?
+//   reporterNotificationSent Boolean @default(false)
+//
+//   // DSA Art. 22 — Trusted Flagger priority
+//   // Reports from trusted flaggers should be processed with priority.
+//   trustedFlaggerReport Boolean @default(false)
+//
+//   @@index([trustedFlaggerReport, status])
+// }
+
+// ---------------------------------------------------------------------------
+// DSA Art. 17 — Statement of Reasons
+// ---------------------------------------------------------------------------
+// Required notification to users when content moderation decisions affect them.
+// Must include: facts, legal ground, explanation, automation disclosure,
+// and redress information.
+
+model StatementOfReasons {
+  id            String  @id @default(cuid())
+  recipientId   String
+  recipientType String  // CONTENT_AUTHOR | REPORTER | ACCOUNT_HOLDER
+
+  // What action was taken
+  decisionType String // CONTENT_REMOVED | CONTENT_HIDDEN | CONTENT_RESTRICTED |
+                      // CONTENT_RESTORED | ACCOUNT_SUSPENDED | ACCOUNT_TERMINATED |
+                      // ACCOUNT_RESTRICTED | WARNING_ISSUED
+
+  // Links to content/report that triggered the decision
+  contentId String? // Post ID (if content decision)
+  reportId  String? // Report ID (if triggered by user report)
+
+  // ----- DSA Art. 17(3) mandatory fields -----
+
+  // (a) Facts and circumstances relied on
+  factsCircumstances String @db.Text
+
+  // (b) Legal provision or Terms section relied upon
+  legalGround String
+
+  // (c) Explanation of why the ground applies
+  groundExplanation String @db.Text
+
+  // (d) Information about automated decision-making (null if not automated)
+  automatedInfo String? @db.Text
+
+  // (e) Redress options: internal complaint, out-of-court dispute, judicial
+  redressInfo String @db.Text
+
+  // ----- Platform tracking -----
+
+  // Unique reference number (format: SOR-YYYY-XXXXXX)
+  referenceNumber String @unique
+
+  // Delivery tracking
+  createdAt      DateTime  @default(now())
+  deliveredAt    DateTime? // When shown to user
+  readAt         DateTime? // When user viewed it
+  deliveryMethod String    @default("IN_APP") // IN_APP | EMAIL | BOTH
+
+  // ----- EU Transparency Database submission tracking -----
+  // These fields track the submission to the EU per Art. 24(5).
+  // Only populated when DSA_EU_SUBMISSIONS_ENABLED=true.
+
+  euSubmittedAt        DateTime? // When successfully submitted
+  euPuid               String?   @unique // Platform-Unique ID sent to EU
+  euSubmissionId       String?   // Numeric ID returned by EU API
+  euSubmissionUuid     String?   // UUID returned by EU API (used for permalinks)
+  euSubmissionError    String?   @db.Text // Last error message (for debugging)
+  euSubmissionAttempts Int       @default(0) // Retry counter
+
+  // ----- Relations -----
+  // Uncomment and adjust to match your User model:
+  // recipient User @relation("StatementRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  // ----- Indexes -----
+  @@index([recipientId])
+  @@index([recipientId, readAt]) // Unread count queries
+  @@index([referenceNumber])
+  @@index([createdAt])
+  @@index([contentId])
+  @@index([euSubmittedAt])
+  @@index([euSubmissionAttempts]) // Find statements stuck in retry
+}
+
+// ---------------------------------------------------------------------------
+// DSA Art. 20 — Internal Complaint Handling
+// ---------------------------------------------------------------------------
+// Users can contest content moderation decisions within 6 months.
+// Complaints must be reviewed by a staff member not involved in the
+// original decision (Art. 20(4)).
+
+enum ComplaintStatus {
+  PENDING      // Awaiting assignment to a reviewer
+  UNDER_REVIEW // Being reviewed by staff
+  RESOLVED     // Final decision made
+}
+
+model Complaint {
+  id     String @id @default(cuid())
+  userId String
+
+  // Links to the decision being contested
+  statementId     String? // References StatementOfReasons
+  relatedPostId   String? // Post ID (if relevant)
+  relatedReportId String? // Report ID (if relevant)
+
+  // What decision is being contested
+  originalDecision String
+
+  // User's complaint
+  complaintText  String  @db.Text
+  supportingInfo String? @db.Text // Additional info from user
+
+  // Review workflow
+  status             ComplaintStatus @default(PENDING)
+  assignedTo         String?        // Admin reviewer ID
+  originalDecisionBy String?        // Admin who made original decision
+                                    // (to enforce different-reviewer rule)
+
+  // Outcome
+  reviewNotes   String?   @db.Text // Internal notes (not shown to user)
+  outcome       String?            // UPHELD | PARTIALLY_UPHELD | REJECTED
+  outcomeReason String?   @db.Text // Explanation of outcome (shown to user)
+  reviewedAt    DateTime?
+  notifiedAt    DateTime?          // When user was notified of outcome
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ----- Relations -----
+  // Uncomment and adjust to match your User model:
+  // user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // ----- Indexes -----
+  @@index([userId])
+  @@index([status, createdAt]) // Admin review queue
+  @@index([statementId])
+}
