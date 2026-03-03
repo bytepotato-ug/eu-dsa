@@ -74,6 +74,9 @@ export interface Notice {
     acknowledged?: Date;
     assessmentStarted?: Date;
     decisionMade?: Date;
+    escalatedAt?: Date;
+    appealedAt?: Date;
+    closedAt?: Date;
     notificationSent?: Date;
     appealWindowEnd?: Date;
   };

@@ -96,6 +96,22 @@ describe('InMemoryStorage', () => {
       expect(found!.state).toBe(NoticeState.ACKNOWLEDGED);
     });
 
+    it('deep-merges nested objects on update (timestamps)', async () => {
+      const store = createInMemoryStorage();
+      const received = new Date('2025-01-01');
+      await store.notices.save(makeNotice({ id: 'n-dm', timestamps: { received } }));
+
+      const acknowledged = new Date('2025-01-02');
+      const updated = await store.notices.update('n-dm', {
+        state: NoticeState.ACKNOWLEDGED,
+        timestamps: { acknowledged } as any,
+      });
+
+      // Both timestamps should be present (merged, not replaced)
+      expect(updated.timestamps.received).toEqual(received);
+      expect(updated.timestamps.acknowledged).toEqual(acknowledged);
+    });
+
     it('throws on updating non-existent notice', async () => {
       const store = createInMemoryStorage();
       await expect(store.notices.update('nope', {})).rejects.toThrow('not found');
@@ -164,6 +180,24 @@ describe('InMemoryStorage', () => {
 
       const result = await store.appeals.find({ state: AppealState.SUBMITTED });
       expect(result.items).toHaveLength(1);
+    });
+
+    it('deep-merges timestamps on appeal update', async () => {
+      const store = createInMemoryStorage();
+      const submitted = new Date('2025-03-01');
+      const windowExpiresAt = new Date('2025-09-01');
+      await store.appeals.save(makeAppeal({ id: 'a-dm', timestamps: { submitted, windowExpiresAt } }));
+
+      const assigned = new Date('2025-03-02');
+      const updated = await store.appeals.update('a-dm', {
+        state: AppealState.ASSIGNED,
+        timestamps: { assigned } as any,
+      });
+
+      // All timestamps should be present (merged, not replaced)
+      expect(updated.timestamps.submitted).toEqual(submitted);
+      expect(updated.timestamps.windowExpiresAt).toEqual(windowExpiresAt);
+      expect(updated.timestamps.assigned).toEqual(assigned);
     });
 
     it('updates and deletes appeals', async () => {

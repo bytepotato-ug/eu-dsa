@@ -25,9 +25,12 @@ import { DEFAULT_RETRY_CONFIG, withRetry } from './retry.js';
 import type { OfflineQueue, QueuedStatement } from './queue.js';
 
 const PRODUCTION_BASE_URL = 'https://transparency.dsa.ec.europa.eu';
+// The EU does not provide a public sandbox. When sandbox: true is set without
+// a custom baseUrl, we use the production URL but log a warning. Platforms
+// running integration tests should provide their own baseUrl or mock server.
 const SANDBOX_BASE_URL = 'https://transparency.dsa.ec.europa.eu';
 
-const VERSION = '0.1.0';
+const VERSION = '0.5.0';
 
 export interface TransparencyDatabaseClientConfig {
   token: string;
@@ -297,7 +300,19 @@ export class TransparencyDatabaseClient {
 
     if (response.status === 429) {
       const retryAfter = response.headers.get('retry-after');
-      const retryAfterMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 60_000;
+      let retryAfterMs = 60_000;
+      if (retryAfter) {
+        const seconds = parseInt(retryAfter, 10);
+        if (!isNaN(seconds)) {
+          retryAfterMs = seconds * 1000;
+        } else {
+          // Retry-After can be an HTTP-date (RFC 7231)
+          const date = new Date(retryAfter);
+          if (!isNaN(date.getTime())) {
+            retryAfterMs = Math.max(0, date.getTime() - Date.now());
+          }
+        }
+      }
       throw new DsaRateLimitError(retryAfterMs, this.lastRateLimitInfo ?? undefined);
     }
 
@@ -329,9 +344,12 @@ export class TransparencyDatabaseClient {
     const reset = headers.get('x-ratelimit-reset');
 
     if (limit && remaining) {
+      const parsedLimit = parseInt(limit, 10);
+      const parsedRemaining = parseInt(remaining, 10);
+      if (isNaN(parsedLimit) || isNaN(parsedRemaining)) return null;
       return {
-        limit: parseInt(limit, 10),
-        remaining: parseInt(remaining, 10),
+        limit: parsedLimit,
+        remaining: parsedRemaining,
         resetAt: reset ? new Date(parseInt(reset, 10) * 1000) : new Date(),
       };
     }

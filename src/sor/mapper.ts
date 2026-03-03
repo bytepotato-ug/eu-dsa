@@ -2,7 +2,7 @@
  * Platform category mapper — bridges platform-specific categories to EU API categories.
  */
 
-import type { Category, CategorySpecification } from '../schemas/enums.js';
+import type { Category, CategorySpecification, ContentType, TerritorialScopeCode } from '../schemas/enums.js';
 import { SoRBuilder } from './builder.js';
 
 export interface CategoryMapping {
@@ -16,8 +16,8 @@ export interface CategoryMapping {
 export interface PlatformMappingConfig<TCategory extends string = string> {
   platformName: string;
   categories: Record<TCategory, CategoryMapping>;
-  defaultContentTypes?: string[];
-  defaultTerritorialScope?: string[];
+  defaultContentTypes?: ContentType[];
+  defaultTerritorialScope?: TerritorialScopeCode[];
 }
 
 /**
@@ -64,11 +64,11 @@ export function createPlatformMapper<TCategory extends string>(
     }
 
     if (config.defaultContentTypes?.length) {
-      builder.contentType(...config.defaultContentTypes as never[]);
+      builder.contentType(...config.defaultContentTypes);
     }
 
     if (config.defaultTerritorialScope?.length) {
-      builder.territorialScope(config.defaultTerritorialScope as never[]);
+      builder.territorialScope(config.defaultTerritorialScope);
     }
 
     return builder;

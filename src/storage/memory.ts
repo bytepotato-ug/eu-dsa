@@ -13,6 +13,28 @@ import type {
   AppealFilters,
 } from './adapter.js';
 
+function deepMergeUpdate<T extends Record<string, unknown>>(existing: T, data: Partial<T>): T {
+  const result = { ...existing };
+  for (const [key, value] of Object.entries(data)) {
+    if (
+      value !== undefined &&
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value) &&
+      !(value instanceof Date)
+    ) {
+      // Merge plain objects (timestamps, metadata, source, etc.) instead of replacing
+      result[key as keyof T] = {
+        ...((existing[key as keyof T] as Record<string, unknown>) ?? {}),
+        ...value,
+      } as T[keyof T];
+    } else if (value !== undefined) {
+      result[key as keyof T] = value as T[keyof T];
+    }
+  }
+  return result;
+}
+
 function paginate<T>(items: T[], options?: ListOptions): PaginatedResult<T> {
   const limit = options?.limit ?? 50;
   const offset = options?.offset ?? 0;
@@ -83,7 +105,9 @@ export function createInMemoryStorage(): StorageAdapter {
       async update(id: string, data: Partial<Notice>): Promise<Notice> {
         const existing = notices.get(id);
         if (!existing) throw new Error(`Notice ${id} not found`);
-        const updated = { ...structuredClone(existing), ...data, id };
+        const cloned = structuredClone(existing);
+        const updated = deepMergeUpdate(cloned as unknown as Record<string, unknown>, data as unknown as Record<string, unknown>) as unknown as Notice;
+        updated.id = id;
         notices.set(id, updated);
         return structuredClone(updated);
       },
@@ -129,7 +153,9 @@ export function createInMemoryStorage(): StorageAdapter {
       async update(id: string, data: Partial<Appeal>): Promise<Appeal> {
         const existing = appeals.get(id);
         if (!existing) throw new Error(`Appeal ${id} not found`);
-        const updated = { ...structuredClone(existing), ...data, id };
+        const cloned = structuredClone(existing);
+        const updated = deepMergeUpdate(cloned as unknown as Record<string, unknown>, data as unknown as Record<string, unknown>) as unknown as Appeal;
+        updated.id = id;
         appeals.set(id, updated);
         return structuredClone(updated);
       },

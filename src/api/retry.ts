@@ -2,14 +2,15 @@
  * Retry logic with exponential backoff and jitter.
  */
 
-import { DsaApiError } from './errors.js';
+import { DsaApiError, DsaNetworkError, DsaRateLimitError } from './errors.js';
 
 export interface RetryConfig {
   maxAttempts: number;
   baseDelayMs: number;
   maxDelayMs: number;
   retryableStatuses: number[];
-  onRetry?: (attempt: number, error: DsaApiError, delayMs: number) => void;
+  retryNetworkErrors?: boolean;
+  onRetry?: (attempt: number, error: Error, delayMs: number) => void;
 }
 
 export const DEFAULT_RETRY_CONFIG: RetryConfig = {
@@ -17,6 +18,7 @@ export const DEFAULT_RETRY_CONFIG: RetryConfig = {
   baseDelayMs: 1000,
   maxDelayMs: 30_000,
   retryableStatuses: [408, 429, 500, 502, 503, 504],
+  retryNetworkErrors: true,
 };
 
 function calculateDelay(attempt: number, config: RetryConfig): number {
@@ -43,22 +45,22 @@ export async function withRetry<T>(
 
       if (attempt >= config.maxAttempts) break;
 
-      const isRetryable = error instanceof DsaApiError
+      // Determine if this error is retryable
+      const isRetryableApi = error instanceof DsaApiError
         && config.retryableStatuses.includes(error.statusCode);
+      const isRetryableNetwork = config.retryNetworkErrors !== false
+        && error instanceof DsaNetworkError;
 
-      if (!isRetryable) throw error;
+      if (!isRetryableApi && !isRetryableNetwork) throw error;
 
       let delayMs = calculateDelay(attempt, config);
 
-      // Respect Retry-After on 429
-      if (error instanceof DsaApiError && error.isRateLimited && error.rateLimitInfo?.resetAt) {
-        const retryAfter = error.rateLimitInfo.resetAt.getTime() - Date.now();
-        if (retryAfter > 0) {
-          delayMs = Math.min(retryAfter, config.maxDelayMs);
-        }
+      // Use retryAfterMs from DsaRateLimitError (parsed from Retry-After header)
+      if (error instanceof DsaRateLimitError && error.retryAfterMs > 0) {
+        delayMs = Math.min(error.retryAfterMs, config.maxDelayMs);
       }
 
-      config.onRetry?.(attempt, error, delayMs);
+      config.onRetry?.(attempt, error as Error, delayMs);
       await sleep(delayMs);
     }
   }
