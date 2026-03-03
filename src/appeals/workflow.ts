@@ -7,6 +7,7 @@
  * - Timely notification of outcome to appellant
  */
 
+import { randomUUID } from 'node:crypto';
 import { AppealState, type Appeal, type AppealCreateParams, type AppealOutcome } from './types.js';
 import { calculateAppealWindowEnd, isAppealWindowOpen } from './window.js';
 import type { AppealWindowConfig } from './window.js';
@@ -50,7 +51,7 @@ export class AppealWorkflow {
     }
 
     return {
-      id: params.id ?? crypto.randomUUID(),
+      id: params.id ?? randomUUID(),
       appellantId: params.appellantId,
       statementReference: params.statementReference,
       relatedNoticeId: params.relatedNoticeId,

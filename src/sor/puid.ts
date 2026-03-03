@@ -5,7 +5,7 @@
  * Max 500 characters.
  */
 
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
 export interface PuidContext {
   platform?: string;
@@ -31,7 +31,7 @@ export function deterministicPuid(ctx: {
  * Format: {platform}-{uuid} or just {uuid}
  */
 export function randomPuid(platform?: string): string {
-  const uuid = crypto.randomUUID();
+  const uuid = randomUUID();
   return platform ? `${sanitize(platform)}-${uuid}` : uuid;
 }
 
@@ -54,7 +54,7 @@ export function hashedPuid(platform: string, ...components: string[]): string {
 export function timestampPuid(platform: string, date?: Date): string {
   const d = date ?? new Date();
   const dateStr = d.toISOString().slice(0, 10).replace(/-/g, '');
-  const suffix = crypto.randomUUID().slice(0, 8);
+  const suffix = randomUUID().slice(0, 8);
   return `${sanitize(platform)}-${dateStr}-${suffix}`;
 }
 
