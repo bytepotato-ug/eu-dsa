@@ -12,7 +12,7 @@ const PRODUCTION_BASE_URL = 'https://transparency.dsa.ec.europa.eu';
 // a custom baseUrl, we use the production URL but log a warning. Platforms
 // running integration tests should provide their own baseUrl or mock server.
 const SANDBOX_BASE_URL = 'https://transparency.dsa.ec.europa.eu';
-const VERSION = '0.5.0';
+const VERSION = '1.0.0';
 export class TransparencyDatabaseClient {
     baseUrl;
     token;

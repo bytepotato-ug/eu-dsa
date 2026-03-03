@@ -6,6 +6,7 @@ import {
   DsaAuthError,
   DsaPuidConflictError,
   DsaNetworkError,
+  DsaRateLimitError,
 } from '../../src/api/errors.js';
 import type { SorSubmission } from '../../src/schemas/api-types.js';
 
@@ -250,6 +251,213 @@ describe('TransparencyDatabaseClient', () => {
       });
 
       await expect(client.submitStatement(validSubmission())).rejects.toThrow(DsaNetworkError);
+    });
+  });
+
+  describe('rate limiting (429)', () => {
+    it('parses retry-after as seconds', async () => {
+      const fetchFn = createMockFetch(429, { message: 'Rate limited' }, {
+        'retry-after': '120',
+      });
+      const client = createClient(fetchFn);
+
+      const err = await client.submitStatement(validSubmission()).catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(DsaRateLimitError);
+      expect((err as DsaRateLimitError).retryAfterMs).toBe(120_000);
+    });
+
+    it('parses retry-after as HTTP-date (RFC 7231)', async () => {
+      const futureDate = new Date(Date.now() + 60_000);
+      const fetchFn = createMockFetch(429, { message: 'Rate limited' }, {
+        'retry-after': futureDate.toUTCString(),
+      });
+      const client = createClient(fetchFn);
+
+      const err = await client.submitStatement(validSubmission()).catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(DsaRateLimitError);
+      expect((err as DsaRateLimitError).retryAfterMs).toBeGreaterThan(50_000);
+      expect((err as DsaRateLimitError).retryAfterMs).toBeLessThanOrEqual(65_000);
+    });
+
+    it('defaults to 60s when retry-after is invalid', async () => {
+      const fetchFn = createMockFetch(429, { message: 'Rate limited' }, {
+        'retry-after': 'not-a-number-or-date',
+      });
+      const client = createClient(fetchFn);
+
+      const err = await client.submitStatement(validSubmission()).catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(DsaRateLimitError);
+      expect((err as DsaRateLimitError).retryAfterMs).toBe(60_000);
+    });
+
+    it('clamps retry-after date in the past to 0', async () => {
+      const fetchFn = createMockFetch(429, { message: 'Rate limited' }, {
+        'retry-after': 'Mon, 01 Jan 2020 00:00:00 GMT',
+      });
+      const client = createClient(fetchFn);
+
+      const err = await client.submitStatement(validSubmission()).catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(DsaRateLimitError);
+      expect((err as DsaRateLimitError).retryAfterMs).toBe(0);
+    });
+
+    it('defaults to 60s when no retry-after header', async () => {
+      const fetchFn = createMockFetch(429, { message: 'Rate limited' });
+      const client = createClient(fetchFn);
+
+      const err = await client.submitStatement(validSubmission()).catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(DsaRateLimitError);
+      expect((err as DsaRateLimitError).retryAfterMs).toBe(60_000);
+    });
+  });
+
+  describe('rate limit header parsing', () => {
+    it('parses valid rate limit headers', async () => {
+      const resetTimestamp = Math.floor(Date.now() / 1000) + 3600;
+      const fetchFn = createMockFetch(200, { you_say: 'ping', i_say: 'pong' }, {
+        'x-ratelimit-limit': '1000',
+        'x-ratelimit-remaining': '950',
+        'x-ratelimit-reset': String(resetTimestamp),
+      });
+      const client = createClient(fetchFn);
+
+      await client.ping();
+      const info = client.getRateLimitInfo();
+      expect(info).not.toBeNull();
+      expect(info!.limit).toBe(1000);
+      expect(info!.remaining).toBe(950);
+      expect(info!.resetAt).toBeInstanceOf(Date);
+      expect(info!.resetAt.getTime()).toBe(resetTimestamp * 1000);
+    });
+
+    it('returns null when limit header is NaN', async () => {
+      const fetchFn = createMockFetch(200, { you_say: 'ping', i_say: 'pong' }, {
+        'x-ratelimit-limit': 'not-a-number',
+        'x-ratelimit-remaining': '50',
+      });
+      const client = createClient(fetchFn);
+
+      await client.ping();
+      expect(client.getRateLimitInfo()).toBeNull();
+    });
+
+    it('returns null when remaining header is NaN', async () => {
+      const fetchFn = createMockFetch(200, { you_say: 'ping', i_say: 'pong' }, {
+        'x-ratelimit-limit': '100',
+        'x-ratelimit-remaining': 'abc',
+      });
+      const client = createClient(fetchFn);
+
+      await client.ping();
+      expect(client.getRateLimitInfo()).toBeNull();
+    });
+
+    it('uses current date when reset header is missing', async () => {
+      const before = Date.now();
+      const fetchFn = createMockFetch(200, { you_say: 'ping', i_say: 'pong' }, {
+        'x-ratelimit-limit': '100',
+        'x-ratelimit-remaining': '99',
+      });
+      const client = createClient(fetchFn);
+
+      await client.ping();
+      const info = client.getRateLimitInfo();
+      expect(info).not.toBeNull();
+      expect(info!.limit).toBe(100);
+      expect(info!.remaining).toBe(99);
+      expect(info!.resetAt.getTime()).toBeGreaterThanOrEqual(before);
+      expect(info!.resetAt.getTime()).toBeLessThanOrEqual(Date.now() + 1000);
+    });
+
+    it('returns null when no rate limit headers present', async () => {
+      const fetchFn = createMockFetch(200, { you_say: 'ping', i_say: 'pong' });
+      const client = createClient(fetchFn);
+
+      await client.ping();
+      expect(client.getRateLimitInfo()).toBeNull();
+    });
+  });
+
+  describe('interceptor chain', () => {
+    it('executes multiple request interceptors in order', async () => {
+      const callOrder: string[] = [];
+      const interceptor1 = vi.fn((ctx: { headers: Record<string, string> }) => {
+        callOrder.push('req1');
+        ctx.headers['X-Custom-1'] = 'value1';
+        return ctx;
+      });
+      const interceptor2 = vi.fn((ctx: { headers: Record<string, string> }) => {
+        callOrder.push('req2');
+        ctx.headers['X-Custom-2'] = 'value2';
+        return ctx;
+      });
+
+      const fetchFn = createMockFetch(200, { you_say: 'ping', i_say: 'pong' });
+      const client = new TransparencyDatabaseClient({
+        token: 'test-token',
+        fetch: fetchFn,
+        retry: { maxAttempts: 1, baseDelayMs: 0, maxDelayMs: 0, retryableStatuses: [] },
+        interceptors: { request: [interceptor1, interceptor2] },
+      });
+
+      await client.ping();
+      expect(callOrder).toEqual(['req1', 'req2']);
+      expect(interceptor1).toHaveBeenCalledOnce();
+      expect(interceptor2).toHaveBeenCalledOnce();
+    });
+
+    it('executes multiple response interceptors in order', async () => {
+      const callOrder: string[] = [];
+      const interceptor1 = vi.fn(() => { callOrder.push('res1'); });
+      const interceptor2 = vi.fn(() => { callOrder.push('res2'); });
+
+      const fetchFn = createMockFetch(200, { you_say: 'ping', i_say: 'pong' });
+      const client = new TransparencyDatabaseClient({
+        token: 'test-token',
+        fetch: fetchFn,
+        retry: { maxAttempts: 1, baseDelayMs: 0, maxDelayMs: 0, retryableStatuses: [] },
+        interceptors: { response: [interceptor1, interceptor2] },
+      });
+
+      await client.ping();
+      expect(callOrder).toEqual(['res1', 'res2']);
+    });
+
+    it('propagates errors from request interceptors', async () => {
+      const failingInterceptor = vi.fn(() => {
+        throw new Error('Request interceptor failed');
+      });
+
+      const fetchFn = createMockFetch(201, {
+        uuid: 'test', id: 1, created_at: '', platform_name: '', permalink: '', self: '',
+      });
+      const client = new TransparencyDatabaseClient({
+        token: 'test-token',
+        fetch: fetchFn,
+        retry: { maxAttempts: 1, baseDelayMs: 0, maxDelayMs: 0, retryableStatuses: [] },
+        interceptors: { request: [failingInterceptor] },
+      });
+
+      await expect(client.submitStatement(validSubmission())).rejects.toThrow('Request interceptor failed');
+      expect(fetchFn).not.toHaveBeenCalled();
+    });
+
+    it('propagates errors from response interceptors', async () => {
+      const failingInterceptor = vi.fn(() => {
+        throw new Error('Response interceptor failed');
+      });
+
+      const fetchFn = createMockFetch(201, {
+        uuid: 'test', id: 1, created_at: '', platform_name: '', permalink: '', self: '',
+      });
+      const client = new TransparencyDatabaseClient({
+        token: 'test-token',
+        fetch: fetchFn,
+        retry: { maxAttempts: 1, baseDelayMs: 0, maxDelayMs: 0, retryableStatuses: [] },
+        interceptors: { response: [failingInterceptor] },
+      });
+
+      await expect(client.submitStatement(validSubmission())).rejects.toThrow('Response interceptor failed');
     });
   });
 

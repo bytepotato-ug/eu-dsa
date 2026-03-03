@@ -262,5 +262,67 @@ describe('Formatters', () => {
       expect(md).not.toContain('## Part 7: Complaints');
       expect(md).not.toContain('## Part 9: Human Resources');
     });
+
+    it('includes outOfCourtSettlements section when populated', async () => {
+      const generator = createReportGenerator({
+        platformName: 'TestPlatform',
+        legalEntity: 'Test GmbH',
+        platformUrl: 'https://test.example.com',
+        tierConfig: { tier: 'VLOP', isSmallEnterprise: false },
+      });
+      const report = await generator.generate(createMockProvider({
+        getQualitativeData: async () => ({
+          methodology: 'Standard approach.',
+          outOfCourtSettlements: 'Participated in 5 out-of-court settlements via certified body.',
+        }),
+      }), period);
+      const md = toMarkdown(report);
+
+      expect(md).toContain('### Out-of-Court Settlements');
+      expect(md).toContain('Participated in 5 out-of-court settlements');
+    });
+
+    it('includes other qualitative section when populated', async () => {
+      const generator = createReportGenerator({
+        platformName: 'TestPlatform',
+        legalEntity: 'Test GmbH',
+        platformUrl: 'https://test.example.com',
+        tierConfig: { tier: 'VLOP', isSmallEnterprise: false },
+      });
+      const report = await generator.generate(createMockProvider({
+        getQualitativeData: async () => ({
+          methodology: 'Standard approach.',
+          other: 'Additional notes on DSA compliance measures.',
+        }),
+      }), period);
+      const md = toMarkdown(report);
+
+      expect(md).toContain('### Other');
+      expect(md).toContain('Additional notes on DSA compliance');
+    });
+
+    it('includes both outOfCourtSettlements and other in correct order', async () => {
+      const generator = createReportGenerator({
+        platformName: 'TestPlatform',
+        legalEntity: 'Test GmbH',
+        platformUrl: 'https://test.example.com',
+        tierConfig: { tier: 'VLOP', isSmallEnterprise: false },
+      });
+      const report = await generator.generate(createMockProvider({
+        getQualitativeData: async () => ({
+          methodology: 'Standard approach.',
+          cooperationWithAuthorities: 'Quarterly reports.',
+          outOfCourtSettlements: 'Used certified ADR body in 3 cases.',
+          other: 'Invested in AI safety research.',
+        }),
+      }), period);
+      const md = toMarkdown(report);
+
+      expect(md).toContain('### Out-of-Court Settlements');
+      expect(md).toContain('### Other');
+      const ocsIndex = md.indexOf('### Out-of-Court Settlements');
+      const otherIndex = md.indexOf('### Other');
+      expect(ocsIndex).toBeLessThan(otherIndex);
+    });
   });
 });
