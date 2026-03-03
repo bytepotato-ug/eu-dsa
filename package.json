@@ -1,6 +1,6 @@
 {
   "name": "dsa-toolkit",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "Open-source EU Digital Services Act compliance toolkit — Statement of Reasons submission, transparency reports, notice-and-action engine, and appeals handling for Node.js platforms",
   "type": "module",
   "main": "./dist/index.js",
@@ -85,6 +85,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "typescript": "^5.4.0",
     "vitest": "^2.0.0"
   }

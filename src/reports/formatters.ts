@@ -295,6 +295,9 @@ export function toMarkdown(report: TransparencyReport): string {
   if (report.qualitative.cooperationWithAuthorities) {
     lines.push(`### Cooperation with Authorities\n${report.qualitative.cooperationWithAuthorities}\n`);
   }
+  if (report.qualitative.outOfCourtSettlements) {
+    lines.push(`### Out-of-Court Settlements\n${report.qualitative.outOfCourtSettlements}\n`);
+  }
   if (report.qualitative.other) {
     lines.push(`### Other\n${report.qualitative.other}\n`);
   }

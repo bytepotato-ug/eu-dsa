@@ -83,6 +83,15 @@ export class NoticeStateMachine {
       case NoticeState.DECIDED_PARTIAL_ACTION:
         updated.timestamps = { ...updated.timestamps, decisionMade: now };
         break;
+      case NoticeState.ESCALATED:
+        updated.timestamps = { ...updated.timestamps, escalatedAt: now };
+        break;
+      case NoticeState.APPEALED:
+        updated.timestamps = { ...updated.timestamps, appealedAt: now };
+        break;
+      case NoticeState.CLOSED:
+        updated.timestamps = { ...updated.timestamps, closedAt: now };
+        break;
     }
 
     // Run transition-specific handler
