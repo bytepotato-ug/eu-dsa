@@ -86,29 +86,35 @@ console.log(`Submitted ${result.statements.length} statements`);
 Map your internal moderation categories to the EU's standardized taxonomy:
 
 ```typescript
-import { createPlatformMapper, SoRBuilder } from 'dsa-toolkit';
+import {
+  createPlatformMapper,
+  SoRBuilder,
+  Category,
+  CategorySpecification,
+  ContentType,
+} from 'dsa-toolkit';
 
 const mapper = createPlatformMapper({
   platformName: 'myapp',
   categories: {
     hate_speech: {
-      euCategory: 'STATEMENT_CATEGORY_ILLEGAL_OR_HARMFUL_SPEECH',
-      euSpecifications: ['KEYWORD_HATE_SPEECH', 'KEYWORD_INCITEMENT_VIOLENCE_HATRED'],
+      euCategory: Category.ILLEGAL_OR_HARMFUL_SPEECH,
+      euSpecifications: [CategorySpecification.HATE_SPEECH, CategorySpecification.INCITEMENT_VIOLENCE_HATRED],
       defaultGround: 'ILLEGAL_CONTENT',
       legalGround: '§130 StGB',
     },
     terrorism: {
-      euCategory: 'STATEMENT_CATEGORY_RISK_FOR_PUBLIC_SECURITY',
-      euSpecifications: ['KEYWORD_TERRORIST_CONTENT'],
+      euCategory: Category.RISK_FOR_PUBLIC_SECURITY,
+      euSpecifications: [CategorySpecification.TERRORIST_CONTENT],
       defaultGround: 'ILLEGAL_CONTENT',
       legalGround: 'EU Reg 2021/784',
     },
     spam: {
-      euCategory: 'STATEMENT_CATEGORY_SCAMS_AND_FRAUD',
+      euCategory: Category.SCAMS_AND_FRAUD,
       defaultGround: 'INCOMPATIBLE_CONTENT',
     },
   },
-  defaultContentTypes: ['CONTENT_TYPE_TEXT'],
+  defaultContentTypes: [ContentType.TEXT],
   defaultTerritorialScope: ['DE'],
 });
 
@@ -170,9 +176,9 @@ const anonId = pseudonymizeUserId('user-42', { salt: process.env.PSEUDO_SALT! })
 // Strip all PII from free-text fields in one pass
 const cleanText = sanitizeForSubmission(
   'User john@example.com (IP: 192.168.1.1) posted hate speech mentioning @victim',
-  { stripIps: true, stripEmails: true, stripMentions: true }
+  { stripIps: true, stripEmailAddresses: true, stripUserMentions: true }
 );
-// → 'User [email] (IP: [ip]) posted hate speech mentioning [mention]'
+// → 'User [EMAIL_REDACTED] (IP: [IP_REDACTED]) posted hate speech mentioning [USER_REDACTED]'
 ```
 
 ## Offline Queue
@@ -285,12 +291,12 @@ try {
 
 | DSA Article | Obligation | Module | Status |
 |-------------|-----------|--------|--------|
-| Art. 17 | Statement of Reasons | `sor/` | v0.1.0 |
-| Art. 24(5) | Submit SoRs to EU Transparency Database | `api/` | v0.1.0 |
-| Art. 16 | Notice-and-action mechanism | `notice/` | v0.2.0 |
-| Art. 20 | Internal complaint-handling | `appeals/` | v0.2.0 |
-| Art. 22 | Trusted flagger processing | `notice/` | v0.2.0 |
-| Art. 15/24/42 | Transparency reports | `reports/` | v0.5.0 |
+| Art. 17 | Statement of Reasons | `sor/` | ✅ v0.1.0 |
+| Art. 24(5) | Submit SoRs to EU Transparency Database | `api/` | ✅ v0.1.0 |
+| Art. 16 | Notice-and-action mechanism | `notice/` | ✅ v0.2.0 |
+| Art. 20 | Internal complaint-handling | `appeals/` | ✅ v0.2.0 |
+| Art. 22 | Trusted flagger processing | `notice/` | ✅ v0.2.0 |
+| Art. 15/24/42 | Transparency reports | `reports/` | ✅ v0.5.0 |
 
 ## Subpath Exports
 
@@ -313,10 +319,10 @@ import { createDsaEventEmitter } from 'dsa-toolkit/events';
 ## Roadmap
 
 - [x] v0.1.0 — Core schemas, API client, SoR builder, PUID generation, pseudonymization, platform mapper
-- [ ] v0.2.0 — Notice engine, appeals handler, event system integration, storage adapter
-- [ ] v0.5.0 — Transparency reports (XLSX/CSV per EU template), mock server
+- [x] v0.2.0 — Notice engine, appeals handler, event system integration, storage adapter
+- [x] v0.5.0 — Transparency reports (CSV/JSON/Markdown per EU template), typed event emitter
 - [ ] v1.0.0 — Stable API, 90%+ coverage, full documentation
-- [ ] Post-1.0 — Express/Fastify/Hono middleware, Mastodon adapter, storage adapters
+- [ ] Post-1.0 — Express/Fastify/Hono middleware, Mastodon adapter, database storage adapters
 
 ## License
 
