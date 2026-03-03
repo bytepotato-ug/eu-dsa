@@ -101,7 +101,7 @@ export function evaluateFlaggerStatus(
 
 /**
  * Apply community bonus scoring — multiple reporters on the same content
- * increase risk score. Per TWIXXXX pattern: +5% per additional reporter (max +25%),
+ * increase risk score. Default: +5% per additional reporter (max +25%),
  * only when base risk >= threshold.
  */
 export function applyCommunityBonus(
