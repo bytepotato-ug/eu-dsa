@@ -233,6 +233,23 @@ export function toMarkdown(report: TransparencyReport): string {
   lines.push(`**Total Actioned:** ${report.ownInitiativeIllegal.totalActioned}`);
   lines.push('');
 
+  // Part 6: TOS Violations
+  if (report.ownInitiativeTos) {
+    lines.push('## Part 6: Own-Initiative Actions (TOS Violations)');
+    lines.push('');
+    lines.push(`**Total Actioned:** ${report.ownInitiativeTos.totalActioned}`);
+    lines.push(`**Trusted Flagger Total:** ${report.ownInitiativeTos.trustedFlaggerTotal}`);
+    lines.push('');
+    if (report.ownInitiativeTos.entries.length > 0) {
+      lines.push('| Category | Member State | Actioned | Restriction | Trusted Flagger |');
+      lines.push('|---|---|---|---|---|');
+      for (const e of report.ownInitiativeTos.entries) {
+        lines.push(`| ${e.category} | ${e.memberState} | ${e.itemsActioned} | ${e.restrictionType} | ${e.trustedFlaggerNotices} |`);
+      }
+    }
+    lines.push('');
+  }
+
   // Part 7: Complaints
   if (report.complaints) {
     lines.push('## Part 7: Complaints and Appeals');

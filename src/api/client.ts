@@ -168,7 +168,10 @@ export class TransparencyDatabaseClient {
     try {
       return await this.submitStatement(submission);
     } catch (error) {
-      if (this.queue && error instanceof DsaApiError && error.isRetryable) {
+      if (this.queue && (
+        (error instanceof DsaApiError && error.isRetryable) ||
+        error instanceof DsaNetworkError
+      )) {
         return this.queue.enqueue(submission);
       }
       throw error;
@@ -295,6 +298,7 @@ export class TransparencyDatabaseClient {
       throw new DsaAuthError(
         `Authentication failed: ${response.status}`,
         response.status as 401 | 403,
+        errorResponse,
       );
     }
 

@@ -16,6 +16,7 @@ function validPayload(overrides = {}) {
     automated_detection: 'No',
     automated_decision: 'AUTOMATED_DECISION_NOT_AUTOMATED',
     puid: 'myapp-mod-12345',
+    territorial_scope: ['DE'],
     ...overrides,
   };
 }
@@ -282,6 +283,85 @@ describe('sorSubmissionSchema', () => {
         territorial_scope: ['XX'],
       }));
       expect(result.success).toBe(false);
+    });
+
+    it('rejects missing territorial_scope', () => {
+      const result = sorSubmissionSchema.safeParse(validPayload({
+        territorial_scope: undefined,
+      }));
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects empty territorial_scope array', () => {
+      const result = sorSubmissionSchema.safeParse(validPayload({
+        territorial_scope: [],
+      }));
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects missing category_specification_other when KEYWORD_OTHER selected', () => {
+      const result = sorSubmissionSchema.safeParse(validPayload({
+        category_specification: ['KEYWORD_OTHER'],
+      }));
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const paths = result.error.issues.map(i => i.path.join('.'));
+        expect(paths).toContain('category_specification_other');
+      }
+    });
+
+    it('accepts category_specification_other when KEYWORD_OTHER selected with explanation', () => {
+      const result = sorSubmissionSchema.safeParse(validPayload({
+        category_specification: ['KEYWORD_OTHER'],
+        category_specification_other: 'Custom violation type',
+      }));
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects end_date_visibility_restriction before application_date', () => {
+      const result = sorSubmissionSchema.safeParse(validPayload({
+        end_date_visibility_restriction: '2024-06-15',
+        application_date: '2024-06-16',
+      }));
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const paths = result.error.issues.map(i => i.path.join('.'));
+        expect(paths).toContain('end_date_visibility_restriction');
+      }
+    });
+
+    it('rejects end_date_monetary_restriction before application_date', () => {
+      const result = sorSubmissionSchema.safeParse(validPayload({
+        end_date_monetary_restriction: '2024-06-15',
+        application_date: '2024-06-16',
+      }));
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const paths = result.error.issues.map(i => i.path.join('.'));
+        expect(paths).toContain('end_date_monetary_restriction');
+      }
+    });
+
+    it('accepts end_date on same day as application_date', () => {
+      const result = sorSubmissionSchema.safeParse(validPayload({
+        end_date_visibility_restriction: '2024-06-16',
+        application_date: '2024-06-16',
+      }));
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts content_date exactly on 2000-01-01', () => {
+      const result = sorSubmissionSchema.safeParse(validPayload({
+        content_date: '2000-01-01',
+      }));
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts application_date exactly on 2020-01-01', () => {
+      const result = sorSubmissionSchema.safeParse(validPayload({
+        application_date: '2020-01-01',
+      }));
+      expect(result.success).toBe(true);
     });
   });
 });

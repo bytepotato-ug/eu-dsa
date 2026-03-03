@@ -24,6 +24,7 @@ function validSubmission(overrides: Partial<SorSubmission> = {}): SorSubmission 
     automated_detection: 'No',
     automated_decision: 'AUTOMATED_DECISION_NOT_AUTOMATED',
     puid: 'test-puid-123',
+    territorial_scope: ['DE'],
     ...overrides,
   } as SorSubmission;
 }
@@ -255,6 +256,19 @@ describe('TransparencyDatabaseClient', () => {
   describe('queue integration', () => {
     it('submitOrQueue falls back to queue on retryable error', async () => {
       const fetchFn = createMockFetch(503, { message: 'Service unavailable' });
+      const client = createClient(fetchFn);
+
+      const { InMemoryQueue } = await import('../../src/api/queue.js');
+      const queue = new InMemoryQueue();
+      client.setQueue(queue);
+
+      const result = await client.submitOrQueue(validSubmission());
+      expect(result).toHaveProperty('status', 'pending');
+      expect(await queue.size()).toBe(1);
+    });
+
+    it('submitOrQueue falls back to queue on network error', async () => {
+      const fetchFn = vi.fn().mockRejectedValue(new Error('Connection refused'));
       const client = createClient(fetchFn);
 
       const { InMemoryQueue } = await import('../../src/api/queue.js');

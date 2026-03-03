@@ -16,8 +16,9 @@ export interface DsaEventEmitter {
   listenerCount(event: DsaEventName): number;
 }
 
-export function createDsaEventEmitter(): DsaEventEmitter {
+export function createDsaEventEmitter(options?: { maxListeners?: number }): DsaEventEmitter {
   const ee = new EventEmitter();
+  ee.setMaxListeners(options?.maxListeners ?? 50);
 
   return {
     on<T extends DsaEventName>(event: T, handler: DsaEventHandler<T>): void {

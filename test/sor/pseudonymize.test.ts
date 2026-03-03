@@ -77,6 +77,24 @@ describe('pseudonymization', () => {
       expect(result).toBe('User connected from [IP_REDACTED]');
     });
 
+    it('strips compressed IPv6 loopback (::1)', () => {
+      const text = 'Localhost connection from ::1 detected.';
+      const result = stripIpAddresses(text);
+      expect(result).not.toContain('::1');
+    });
+
+    it('strips compressed IPv6 link-local (fe80::1)', () => {
+      const text = 'Connected from fe80::1 on interface eth0.';
+      const result = stripIpAddresses(text);
+      expect(result).not.toContain('fe80::1');
+    });
+
+    it('strips compressed IPv6 with middle compression (2001:db8::1)', () => {
+      const text = 'User at 2001:db8::1 reported content.';
+      const result = stripIpAddresses(text);
+      expect(result).not.toContain('2001:db8::1');
+    });
+
     it('preserves text without IPs', () => {
       const text = 'Normal text without any IP addresses.';
       expect(stripIpAddresses(text)).toBe(text);

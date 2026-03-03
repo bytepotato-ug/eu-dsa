@@ -84,8 +84,8 @@ export interface SorSubmission {
   // --- Identifier (REQUIRED) ---
   puid: string;
 
-  // --- Scope (optional) ---
-  territorial_scope?: TerritorialScopeCode[];
+  // --- Scope (REQUIRED) ---
+  territorial_scope: TerritorialScopeCode[];
   content_language?: string;
 
   // --- Content ID (optional) ---
