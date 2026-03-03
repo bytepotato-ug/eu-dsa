@@ -1,0 +1,91 @@
+{
+  "name": "dsa-toolkit",
+  "version": "0.1.0",
+  "description": "Open-source EU Digital Services Act compliance toolkit — Statement of Reasons submission, transparency reports, notice-and-action engine, and appeals handling for Node.js platforms",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schemas": {
+      "types": "./dist/schemas/index.d.ts",
+      "import": "./dist/schemas/index.js"
+    },
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.js"
+    },
+    "./sor": {
+      "types": "./dist/sor/index.d.ts",
+      "import": "./dist/sor/index.js"
+    },
+    "./notice": {
+      "types": "./dist/notice/index.d.ts",
+      "import": "./dist/notice/index.js"
+    },
+    "./appeals": {
+      "types": "./dist/appeals/index.d.ts",
+      "import": "./dist/appeals/index.js"
+    },
+    "./reports": {
+      "types": "./dist/reports/index.d.ts",
+      "import": "./dist/reports/index.js"
+    },
+    "./events": {
+      "types": "./dist/events/index.d.ts",
+      "import": "./dist/events/index.js"
+    },
+    "./storage": {
+      "types": "./dist/storage/index.d.ts",
+      "import": "./dist/storage/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "dsa",
+    "digital-services-act",
+    "eu",
+    "compliance",
+    "transparency",
+    "content-moderation",
+    "statement-of-reasons",
+    "transparency-database",
+    "notice-and-action",
+    "eu-regulation",
+    "platform-regulation",
+    "moderation",
+    "trusted-flagger",
+    "appeals",
+    "gdpr"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
+  }
+}
