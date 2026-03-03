@@ -19,7 +19,7 @@ All errors extend `DsaToolkitError` which extends `Error`. Every error has a `co
 
 ### DsaToolkitError
 
-Base error for all dsa-toolkit errors.
+Base error for all eu-dsa errors.
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -228,7 +228,7 @@ const client = new TransparencyDatabaseClient({
 For high-availability submission, attach a queue to the client:
 
 ```ts
-import { TransparencyDatabaseClient, InMemoryQueue } from 'dsa-toolkit';
+import { TransparencyDatabaseClient, InMemoryQueue } from 'eu-dsa';
 
 const client = new TransparencyDatabaseClient({ token: 'your-token' });
 const queue = new InMemoryQueue({ maxSize: 50_000, maxRetries: 5 });
@@ -267,7 +267,7 @@ import {
   DsaBatchError,
   DsaNetworkError,
   DsaApiError,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 try {
   const response = await client.submitStatement(sor);

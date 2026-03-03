@@ -67,7 +67,7 @@ export class TransparencyDatabaseClient {
     this.requestInterceptors = config.interceptors?.request ?? [];
     this.responseInterceptors = config.interceptors?.response ?? [];
     this.fetchFn = config.fetch ?? globalThis.fetch;
-    this.userAgent = config.userAgent ?? `dsa-toolkit/${VERSION}`;
+    this.userAgent = config.userAgent ?? `eu-dsa/${VERSION}`;
   }
 
   /**

@@ -2,7 +2,7 @@
 // DSA Compliance — Express Integration Reference
 // =============================================================================
 //
-// This file shows a complete Express integration with dsa-toolkit.
+// This file shows a complete Express integration with eu-dsa.
 // It is NOT a runnable app — it's a well-commented reference showing the
 // patterns you need. Adapt to your database, auth, and infrastructure.
 //
@@ -14,7 +14,7 @@
 //   5. GET  /admin/dsa/stats — Admin monitoring endpoint
 //
 // Prerequisites:
-//   npm install dsa-toolkit express
+//   npm install eu-dsa express
 //   Database schema from examples/prisma-schema.prisma
 // =============================================================================
 
@@ -38,7 +38,7 @@ import {
   DsaAuthError,
   DsaValidationError,
   DsaRateLimitError,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 const app = express();
 app.use(express.json());
@@ -52,7 +52,7 @@ const client = new TransparencyDatabaseClient({
   token: process.env.DSA_EU_API_TOKEN!,
   timeoutMs: 30_000,
   retry: { maxAttempts: 1 }, // Let your job queue handle retries
-  userAgent: 'myplatform/1.0 dsa-toolkit/1.0.0',
+  userAgent: 'myplatform/1.0 eu-dsa/1.0.0',
 });
 
 // Category mapper — maps your platform's categories to EU taxonomy
@@ -186,7 +186,7 @@ app.post('/api/moderation/action', async (req, res) => {
 
     res.json({ success: true, referenceNumber });
   } catch (error) {
-    // Handle dsa-toolkit errors specifically
+    // Handle eu-dsa errors specifically
     if (error instanceof DsaPuidConflictError) {
       // Already submitted — idempotent, treat as success
       res.json({ success: true, note: 'Already submitted' });

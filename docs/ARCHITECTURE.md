@@ -2,7 +2,7 @@
 
 ## Overview
 
-dsa-toolkit is a modular TypeScript library for EU Digital Services Act compliance. It has a single runtime dependency (Zod) and ships as ESM-only with 9 subpath exports.
+eu-dsa is a modular TypeScript library for EU Digital Services Act compliance. It has a single runtime dependency (Zod) and ships as ESM-only with 9 subpath exports.
 
 ## Module Dependency Graph
 
@@ -123,7 +123,7 @@ dsa-toolkit is a modular TypeScript library for EU Digital Services Act complian
 ## Extension Points
 
 ### 1. StorageAdapter
-Implement `StorageAdapter` from `dsa-toolkit/storage` for your database. The interface has 3 sub-adapters (`notices`, `appeals`, `queue`) with standard CRUD + filtering. `createInMemoryStorage()` ships with core for testing.
+Implement `StorageAdapter` from `eu-dsa/storage` for your database. The interface has 3 sub-adapters (`notices`, `appeals`, `queue`) with standard CRUD + filtering. `createInMemoryStorage()` ships with core for testing.
 
 ### 2. TransparencyDataProvider
 Implement this interface to feed your platform's data into the report generator. Each method corresponds to one or more report parts. Query your database and return the structured data.

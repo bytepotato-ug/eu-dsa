@@ -245,7 +245,7 @@ describe('Formatters', () => {
       expect(md).toContain('94.0%');
       expect(md).toContain('## Part 11: Qualitative Information');
       expect(md).toContain('## Processing Times');
-      expect(md).toContain('dsa-toolkit');
+      expect(md).toContain('eu-dsa');
     });
 
     it('omits optional sections for INTERMEDIARY', async () => {

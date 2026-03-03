@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Report formatters: `toCSV()` (11 parts per EU template), `toJSON()`, `toMarkdown()`
 - Report types: `ReportingPeriod`, `TransparencyReport`, `ReportIdentification`
 - Data types for all 10 quantitative parts + qualitative section
-- Subpath export `dsa-toolkit/reports`
+- Subpath export `eu-dsa/reports`
 
 ## [0.2.0] - 2026-03-03
 
@@ -54,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `notices` (8 methods), `appeals` (8 methods), `queue` (5 methods)
   - `createInMemoryStorage()` implementation for testing
 - Offline queue (`InMemoryQueue`) with `submitOrQueue()` and `flushQueue()`
-- Subpath exports: `dsa-toolkit/notice`, `dsa-toolkit/appeals`, `dsa-toolkit/events`, `dsa-toolkit/storage`
+- Subpath exports: `eu-dsa/notice`, `eu-dsa/appeals`, `eu-dsa/events`, `eu-dsa/storage`
 
 ## [0.1.0] - 2026-03-03
 
@@ -76,4 +76,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GDPR pseudonymization: `pseudonymizeUserId`, `pseudonymizeText`, `stripIpAddresses`, `stripEmails`, `stripMentions`, `sanitizeForSubmission`
 - `createPlatformMapper` for bridging platform categories to EU taxonomy
 - Error class hierarchy: `DsaToolkitError`, `DsaValidationError`, `DsaNetworkError`, `DsaApiError`, `DsaAuthError`, `DsaPuidConflictError`, `DsaRateLimitError`, `DsaBatchError`
-- Subpath exports: `dsa-toolkit/schemas`, `dsa-toolkit/api`, `dsa-toolkit/sor`
+- Subpath exports: `eu-dsa/schemas`, `eu-dsa/api`, `eu-dsa/sor`

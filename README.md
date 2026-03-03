@@ -1,4 +1,4 @@
-# dsa-toolkit
+# eu-dsa
 
 > Open-source EU Digital Services Act compliance toolkit for Node.js platforms.
 
@@ -6,12 +6,12 @@ The EU Digital Services Act has been fully enforceable since February 2024. Ever
 
 **There are 2M+ npm packages. Until now, zero addressed the DSA.**
 
-`dsa-toolkit` is the first open-source developer toolkit for DSA compliance. It handles the technical obligations so you can focus on building your platform.
+`eu-dsa` is the first open-source developer toolkit for DSA compliance. It handles the technical obligations so you can focus on building your platform.
 
 ## Install
 
 ```bash
-npm install dsa-toolkit
+npm install eu-dsa
 ```
 
 Requires Node.js 18+. TypeScript-first with full type safety. ESM-only.
@@ -23,7 +23,7 @@ import {
   TransparencyDatabaseClient,
   SoRBuilder,
   deterministicPuid,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 const client = new TransparencyDatabaseClient({
   token: process.env.EU_TRANSPARENCY_TOKEN!,
@@ -55,7 +55,7 @@ console.log(`Submitted: ${result.uuid}`);
 ## Batch Submission
 
 ```typescript
-import { TransparencyDatabaseClient, SoRBuilder, randomPuid } from 'dsa-toolkit';
+import { TransparencyDatabaseClient, SoRBuilder, randomPuid } from 'eu-dsa';
 
 const client = new TransparencyDatabaseClient({
   token: process.env.EU_TRANSPARENCY_TOKEN!,
@@ -92,7 +92,7 @@ import {
   Category,
   CategorySpecification,
   ContentType,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 const mapper = createPlatformMapper({
   platformName: 'myapp',
@@ -134,7 +134,7 @@ import {
   hashedPuid,
   timestampPuid,
   isValidPuid,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 // Deterministic — same inputs always produce the same PUID
 deterministicPuid({ platform: 'myapp', actionType: 'mod', referenceId: '123' });
@@ -167,7 +167,7 @@ import {
   sanitizeForSubmission,
   stripIpAddresses,
   stripEmails,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 // Hash user IDs
 const anonId = pseudonymizeUserId('user-42', { salt: process.env.PSEUDO_SALT! });
@@ -186,7 +186,7 @@ const cleanText = sanitizeForSubmission(
 Handle API downtime gracefully with automatic queuing:
 
 ```typescript
-import { TransparencyDatabaseClient, InMemoryQueue } from 'dsa-toolkit';
+import { TransparencyDatabaseClient, InMemoryQueue } from 'eu-dsa';
 
 const client = new TransparencyDatabaseClient({
   token: process.env.EU_TRANSPARENCY_TOKEN!,
@@ -210,7 +210,7 @@ const { submitted, failed } = await client.flushQueue();
 Log every API call for compliance audit trails:
 
 ```typescript
-import { TransparencyDatabaseClient } from 'dsa-toolkit';
+import { TransparencyDatabaseClient } from 'eu-dsa';
 
 const client = new TransparencyDatabaseClient({
   token: process.env.EU_TRANSPARENCY_TOKEN!,
@@ -231,7 +231,7 @@ const client = new TransparencyDatabaseClient({
 React to DSA lifecycle events:
 
 ```typescript
-import { createDsaEventEmitter } from 'dsa-toolkit';
+import { createDsaEventEmitter } from 'eu-dsa';
 
 const emitter = createDsaEventEmitter();
 
@@ -260,7 +260,7 @@ import {
   DsaPuidConflictError,
   DsaRateLimitError,
   DsaNetworkError,
-} from 'dsa-toolkit';
+} from 'eu-dsa';
 
 try {
   await client.submitStatement(sor);
@@ -289,9 +289,9 @@ try {
 
 ## What This Library Covers vs. What You Build
 
-`dsa-toolkit` handles the **protocol layer** — talking to the EU, validating data, building compliant submissions. Your platform still needs application-level code to tie it all together.
+`eu-dsa` handles the **protocol layer** — talking to the EU, validating data, building compliant submissions. Your platform still needs application-level code to tie it all together.
 
-| Layer | dsa-toolkit provides | You build |
+| Layer | eu-dsa provides | You build |
 |-------|---------------------|-----------|
 | **EU API** | HTTP client, auth, retries, rate limiting, batch chunking | Client initialization, API token management |
 | **Statements of Reasons** | `SoRBuilder` fluent API, Zod validation, 160+ EU enums | Database schema, SoR creation logic, user notification |
@@ -303,7 +303,7 @@ try {
 | **Trusted Flaggers (Art. 22)** | Priority multiplier, accuracy evaluation | Accuracy tracking in your database, status management |
 | **Reports (Art. 15/24)** | Report generator, CSV/JSON/Markdown formatters | `TransparencyDataProvider` implementation (queries your database) |
 
-**In short**: `dsa-toolkit` is ~20% of the work. The remaining ~80% is application code specific to your platform, database, and infrastructure.
+**In short**: `eu-dsa` is ~20% of the work. The remaining ~80% is application code specific to your platform, database, and infrastructure.
 
 See the [Integration Guide](docs/INTEGRATION-GUIDE.md) for a step-by-step walkthrough with code examples, and the [example Prisma schema](examples/prisma-schema.prisma) for a ready-to-copy database schema.
 
@@ -323,10 +323,10 @@ See the [Integration Guide](docs/INTEGRATION-GUIDE.md) for a step-by-step walkth
 Import only what you need:
 
 ```typescript
-import { TransparencyDatabaseClient } from 'dsa-toolkit/api';
-import { SoRBuilder } from 'dsa-toolkit/sor';
-import { sorSubmissionSchema } from 'dsa-toolkit/schemas';
-import { createDsaEventEmitter } from 'dsa-toolkit/events';
+import { TransparencyDatabaseClient } from 'eu-dsa/api';
+import { SoRBuilder } from 'eu-dsa/sor';
+import { sorSubmissionSchema } from 'eu-dsa/schemas';
+import { createDsaEventEmitter } from 'eu-dsa/events';
 ```
 
 ## Links
