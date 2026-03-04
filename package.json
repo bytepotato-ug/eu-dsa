@@ -78,6 +78,14 @@
   ],
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytepotato-ug/eu-dsa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bytepotato-ug/eu-dsa/issues"
+  },
+  "homepage": "https://github.com/bytepotato-ug/eu-dsa#readme",
   "engines": {
     "node": ">=18.0.0"
   },

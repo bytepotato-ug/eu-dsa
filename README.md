@@ -1,5 +1,11 @@
 # eu-dsa
 
+[![npm version](https://img.shields.io/npm/v/eu-dsa.svg)](https://www.npmjs.com/package/eu-dsa)
+[![CI](https://github.com/bytepotato-ug/eu-dsa/actions/workflows/ci.yml/badge.svg)](https://github.com/bytepotato-ug/eu-dsa/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/node/v/eu-dsa.svg)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org/)
+
 > Open-source EU Digital Services Act compliance toolkit for Node.js platforms.
 
 The EU Digital Services Act has been fully enforceable since February 2024. Every online platform serving EU users must submit Statements of Reasons to the EU Transparency Database, generate standardized transparency reports, implement notice-and-action mechanisms, and handle appeals — all with statutory deadlines.
